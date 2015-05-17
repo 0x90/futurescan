@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 
 __author__ = '090h'
@@ -112,6 +112,7 @@ class HttpScan(DummyScan):
         for u in urls:
             url = get_full_url(host, u)
             r, ex = self.scan_url(url)
+            self.out.logger.write_response(url, r, ex)
             if self.filter(r):
                 self.out.write(url, r, ex)
                 res.append((url, r, ex))
@@ -139,7 +140,8 @@ class FutureScan(HttpScan):
 
     def run(self):
         self.out.start()
-        self.out.log('Starting...')
+        self.out.log('Starting scan agains %i hosts %i urls' %
+                     (len(self.hosts), len(self.urls)))
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGQUIT, self.signal_handler)
 
@@ -156,7 +158,7 @@ class FutureScan(HttpScan):
             host = future_to_host[future]
             try:
                 r = future.result()
-                self.out.log('Host %s scanned Result = %s' % (host, r))
+                # self.out.log('Host %s scanned Result = %s' % (host, r))
                 self.stats.done += 1
 
                 if r is None:
@@ -168,7 +170,7 @@ class FutureScan(HttpScan):
 
         # Summary
         self.stats.finish()
-        self.out.log('Summary:\n%s' % self.stats)
+        self.out.log('\nSummary:\n%s' % self.stats)
 
         # Wait for logger to stop.
         self.out.logger.stop()

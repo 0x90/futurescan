@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 #
 
 __author__ = '090h'
@@ -28,7 +28,12 @@ class FutureScanOutput(DummyThreadQueue):
         self.logger.start()
         while not self._stop:
             u, r, e = self.queue.get()
-            self.logger.write('%s\t%s\t%s' % (u, r.status_code, e))
+            # if e is None and r:
+            #     self.logger.write('%s\t%s\t%s' % (u, r.status_code, e))
+            # else:
+            #     self.logger.write('%s\t%s\t%s' % (u, r.status_code, e))
+            for h in self.handlers:
+                h.write(u, r, e)
 
     def stop(self):
         self.logger.stop()
@@ -43,21 +48,4 @@ class FutureScanOutput(DummyThreadQueue):
     def critical(self, msg):
         self.log(msg, logging.CRITICAL)
 
-    def _display_progress(self, **kwargs):
-        # TODO: add detailed stats
-        # Calculate progreess
-        # percentage = '{percent:.2%}'.format(percent=float(self.urls_scanned) / self.args.urls_count)
-        # percentage = self.sta
-        # Generate and print colored output
-        out = '[%s] [worker:%02i] [%s]\t%s -> status:%i ' % (
-            str_now(), kwargs['worker'], percentage, kwargs['url'], kwargs['status'])
-        if kwargs['exception'] is not None:
-            out += 'error: (%s)' % str(kwargs['exception'])
-        else:
-            out += 'length: %s' % naturalsize(int(kwargs['length']))
-        if kwargs['status'] == 200:
-            print(Fore.GREEN + out + Fore.RESET)
-        elif 400 <= kwargs['status'] < 500 or kwargs['status'] == -1:
-            print(Fore.RED + out + Fore.RESET)
-        else:
-            print(Fore.YELLOW + out + Fore.RESET)
+
